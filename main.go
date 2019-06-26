@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -41,9 +42,7 @@ func main() {
 		panic("No projects in workspace")
 	}
 	tasks := getAllTasks(&client, authHeader, projectGIDs)
-	for _, task := range tasks {
-		fmt.Println(task.Name)
-	}
+	printCompletedTasks(tasks)
 }
 
 func getWorkspaceGID(client *http.Client, authHeader string) string {
@@ -110,4 +109,19 @@ func getAllTasks(client *http.Client, authHeader string, projectGIDs []string) [
 		tasks = append(tasks, taskResponse.Data...)
 	}
 	return tasks
+}
+
+func printCompletedTasks(tasks []Task) {
+	var completedTasks []Task
+	for _, task := range tasks {
+		if task.Completed {
+			completedTasks = append(completedTasks, task)
+		}
+	}
+	sort.Slice(completedTasks, func(i, j int) bool { return completedTasks[i].CompletedAt.Before(completedTasks[j].CompletedAt) })
+	fmt.Println("Completed Tasks")
+	fmt.Println("---------------")
+	for _, task := range completedTasks {
+		fmt.Println("- ", task.Name)
+	}
 }
