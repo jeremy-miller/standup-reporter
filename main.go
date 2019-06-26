@@ -8,6 +8,14 @@ import (
 	"os"
 	"sort"
 	"time"
+
+	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	app        = kingpin.New("standup-reporter", "Command-line application to gather daily standup reports.")
+	days       = app.Flag("days", "Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).").Short('d').PlaceHolder("N").Int()
+	asanaToken = app.Flag("asana", "Asana Personal Access Token").Short('a').Required().PlaceHolder("TOKEN").String()
 )
 
 type AsanaResponse struct {
@@ -29,8 +37,9 @@ type Task struct {
 }
 
 func main() {
-	accessToken := os.Getenv("ASANA_PERSONAL_ACCESS_TOKEN")
-	authHeader := fmt.Sprintf("Bearer %s", accessToken)
+	app.HelpFlag.Short('h')
+	kingpin.MustParse(app.Parse(os.Args[1:]))
+	authHeader := fmt.Sprintf("Bearer %s", *asanaToken)
 	client := http.Client{}
 
 	workspaceGID := getWorkspaceGID(&client, authHeader)

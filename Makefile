@@ -14,9 +14,18 @@ build: ## Build the standup-reporter executable
 	@go install -i $(PKG_LIST)
 
 .PHONY: run
-run: ## Run the standup-reporter
-	@go run $(PKG_LIST)
+run: ## Run the standup-reporter; example command `make run asana=abc123 days=1`
+	@standup-reporter --asana=$(asana) --days=$(days)
+
+.PHONY: update-deps
+update-deps: ## Update dependencies
+	@go get -u ./...
+
+.PHONY: remove-deps
+remove-deps: ## Remove unused dependencies
+	@go mod tidy
 
 .PHONY: clean
 clean: ## Remove compiled executable
 	@go clean $(PKG_LIST)
+	@rm -rf ${GOPATH}/bin/standup-reporter
