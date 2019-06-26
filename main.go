@@ -39,6 +39,9 @@ type Task struct {
 func main() {
 	app.HelpFlag.Short('h')
 	kingpin.MustParse(app.Parse(os.Args[1:]))
+	if *days == 0 {
+		*days = calculateDays()
+	}
 	authHeader := fmt.Sprintf("Bearer %s", *asanaToken)
 	client := http.Client{}
 
@@ -50,8 +53,15 @@ func main() {
 	if len(projectGIDs) == 0 {
 		panic("No projects in workspace")
 	}
-	tasks := getAllTasks(&client, authHeader, projectGIDs)
+	tasks := getAllTasks(&client, authHeader, projectGIDs, *days)
 	printCompletedTasks(tasks)
+}
+
+func calculateDays() int {
+	if time.Now().Weekday() == time.Monday { // account for weekend
+		return 3
+	}
+	return 1
 }
 
 func getWorkspaceGID(client *http.Client, authHeader string) string {
@@ -96,10 +106,10 @@ func getProjectGIDs(client *http.Client, authHeader string, workspaceGID string)
 	return projectGIDs
 }
 
-func getAllTasks(client *http.Client, authHeader string, projectGIDs []string) []Task {
+func getAllTasks(client *http.Client, authHeader string, projectGIDs []string, days int) []Task {
 	var tasks []Task
 	for _, projectGID := range projectGIDs {
-		completedSince := time.Now().UTC().AddDate(0, 0, -1).Format(time.RFC3339)
+		completedSince := time.Now().UTC().AddDate(0, 0, -days).Format(time.RFC3339)
 		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, completedSince)
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
