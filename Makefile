@@ -5,7 +5,7 @@ default: help
 .PHONY: help
 help: ## Show this help
 	@echo
-	@echo "Choose a command run:"
+	@echo "Available commands:"
 	@echo
 	@awk -F ':|##' '/^[^\t].+?:.*?##/ {printf "\033[36m%-30s\033[0m %s\n", $$1, $$NF}' $(MAKEFILE_LIST)
 
