@@ -13,10 +13,6 @@ help: ## Show this help
 build: ## Build the standup-reporter executable
 	@go install -i $(PKG_LIST)
 
-.PHONY: run
-run: ## Run the standup-reporter; example command `make run asana=abc123 days=1`
-	@standup-reporter --asana=$(asana) --days=$(days)
-
 .PHONY: update-deps
 update-deps: ## Update dependencies
 	@go get -u ./...
