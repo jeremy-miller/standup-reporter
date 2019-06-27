@@ -22,6 +22,6 @@ remove-deps: ## Remove unused dependencies
 	@go mod tidy
 
 .PHONY: clean
-clean: ## Remove compiled executable
+clean: ## Remove generated/compiled files
 	@go clean $(PKG_LIST)
 	@rm -rf ${GOPATH}/bin/standup-reporter
