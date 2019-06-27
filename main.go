@@ -44,6 +44,9 @@ func main() {
 	}
 	authHeader := fmt.Sprintf("Bearer %s", *asanaToken)
 	client := http.Client{}
+	t := time.Now().Local()
+	todayMidnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+	earliestDate := todayMidnight.AddDate(0, 0, -*days).Format(time.RFC3339)
 
 	workspaceGID := getWorkspaceGID(&client, authHeader)
 	if workspaceGID == "" {
@@ -53,8 +56,8 @@ func main() {
 	if len(projectGIDs) == 0 {
 		panic("No projects in workspace")
 	}
-	tasks := getAllTasks(&client, authHeader, projectGIDs, *days)
-	printCompletedTasks(tasks)
+	tasks := getAllTasks(&client, authHeader, projectGIDs, earliestDate)
+	printCompletedTasks(tasks, todayMidnight)
 }
 
 func calculateDays() int {
@@ -106,11 +109,10 @@ func getProjectGIDs(client *http.Client, authHeader string, workspaceGID string)
 	return projectGIDs
 }
 
-func getAllTasks(client *http.Client, authHeader string, projectGIDs []string, days int) []Task {
+func getAllTasks(client *http.Client, authHeader string, projectGIDs []string, earliestDate string) []Task {
 	var tasks []Task
 	for _, projectGID := range projectGIDs {
-		completedSince := time.Now().UTC().AddDate(0, 0, -days).Format(time.RFC3339)
-		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, completedSince)
+		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, earliestDate)
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Fatal(err)
@@ -130,16 +132,15 @@ func getAllTasks(client *http.Client, authHeader string, projectGIDs []string, d
 	return tasks
 }
 
-func printCompletedTasks(tasks []Task) {
+func printCompletedTasks(tasks []Task, todayMidnight time.Time) {
 	var completedTasks []Task
 	for _, task := range tasks {
-		if task.Completed {
+		if task.Completed && task.CompletedAt.Before(todayMidnight) {
 			completedTasks = append(completedTasks, task)
 		}
 	}
 	sort.Slice(completedTasks, func(i, j int) bool { return completedTasks[i].CompletedAt.Before(completedTasks[j].CompletedAt) })
-	fmt.Println("Completed Tasks")
-	fmt.Println("---------------")
+	fmt.Println("--- Completed Tasks ---")
 	for _, task := range completedTasks {
 		fmt.Println("- ", task.Name)
 	}
