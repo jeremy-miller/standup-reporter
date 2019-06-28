@@ -28,4 +28,4 @@ clean: ## Remove generated/compiled files
 
 .PHONY: update-hooks
 update-hooks: ## Update pre-commit hook versions
-	@pre-commit autoupdate
+	@pre-commit autoupdate -c githooks/.pre-commit-config.yaml
