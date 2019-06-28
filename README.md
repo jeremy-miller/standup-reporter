@@ -26,8 +26,9 @@ To run: `standup-reporter --asana=<token>`
 To create an Asana personal access token:
 
 1. Login to Asana
-2. Click your profile photo from the top bar and select _My Profile Settings_
+2. Click your profile photo from the top bar and select _My Profile Settings..._
 3. Navigate to the _Apps_ tab
-4. Select _Personal Access Token_
-5. Add a _Description_
-5. Click the _Create_ button
+4. Select _Manage Developer Apps_
+5. Select _+ Create New Personal Access Token_
+6. Add a _Description_ and choose _Never include numeric IDs_ under _Webhook ID Behavior_
+7. Click the _Create_ button
