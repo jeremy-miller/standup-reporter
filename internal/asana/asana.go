@@ -31,7 +31,7 @@ type task struct {
 }
 
 func Report(config *configuration.Configuration) error {
-	fmt.Println("Gathering Asana task data")
+	fmt.Println("Gathering Asana data")
 	workspaceGID, err := workspaceGID(config)
 	if err != nil {
 		return xerrors.Errorf("error retrieving workspace: %w", err)
@@ -75,7 +75,7 @@ func workspaceGID(config *configuration.Configuration) (string, error) {
 }
 
 func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]string, error) {
-	fmt.Println("Getting Asana projects in workspace")
+	fmt.Println("Getting projects in workspace")
 	url := fmt.Sprintf("https://app.asana.com/api/1.0/workspaces/%s/projects", workspaceGID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -133,7 +133,7 @@ func printCompletedTasks(tasks []task, config *configuration.Configuration) {
 		}
 	}
 	sort.Slice(completedTasks, func(i, j int) bool { return completedTasks[i].CompletedAt.Before(completedTasks[j].CompletedAt) })
-	fmt.Println("--- Completed Tasks ---")
+	fmt.Println("\nYesterday's Activity:")
 	for _, task := range completedTasks {
 		fmt.Println("- ", task.Name)
 	}
