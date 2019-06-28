@@ -19,4 +19,4 @@ After install, the pre-commit hooks configured in `.pre-commit-config.yaml` will
 To update `pre-commit` hooks: `make update-hooks`
 
 ## Run
-To run: `standup-reporter --asana=<token> --days=1`
+To run: `standup-reporter --asana=<token>`
