@@ -6,6 +6,7 @@ Generate reports for standup meetings.
     - [Install `pre-commit`](#install-pre-commit)
     - [Update Hooks](#update-hooks)
 - [Run](#run)
+    - [Create Asana Personal Access Token](#create-asana-personal-access-token)
 
 ## Git Pre-Commit Hooks
 ### Install `pre-commit`
@@ -20,3 +21,13 @@ To update `pre-commit` hooks: `make update-hooks`
 
 ## Run
 To run: `standup-reporter --asana=<token>`
+
+### Create Asana Personal Access Token
+To create an Asana personal access token:
+
+1. Login to Asana
+2. Click your profile photo from the top bar and select _My Profile Settings_
+3. Navigate to the _Apps_ tab
+4. Select _Personal Access Token_
+5. Add a _Description_
+5. Click the _Create_ button
