@@ -25,3 +25,7 @@ remove-deps: ## Remove unused dependencies
 clean: ## Remove generated/compiled files
 	@go clean $(PKG_LIST)
 	@rm -rf ${GOPATH}/bin/standup-reporter
+
+.PHONY: update-hooks
+update-hooks: ## Update pre-commit hook versions
+	@pre-commit autoupdate
