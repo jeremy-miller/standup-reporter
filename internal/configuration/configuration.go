@@ -1,4 +1,4 @@
-package config
+package configuration
 
 import (
 	"fmt"
@@ -6,20 +6,20 @@ import (
 	"time"
 )
 
-type Config struct {
+type Configuration struct {
 	AuthHeader    string
 	Client        http.Client
 	TodayMidnight time.Time
 	EarliestDate  string
 }
 
-func Get(days int, asanaToken string) *Config {
+func Get(days int, asanaToken string) *Configuration {
 	if days == 0 {
 		days = calculateDays()
 	}
 	t := time.Now().Local()
 	todayMidnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
-	return &Config{
+	return &Configuration{
 		AuthHeader:    fmt.Sprintf("Bearer %s", asanaToken),
 		Client:        http.Client{},
 		TodayMidnight: todayMidnight,

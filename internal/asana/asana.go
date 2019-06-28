@@ -8,7 +8,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/jeremy-miller/standup-reporter/internal/config"
+	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
 type response struct {
@@ -29,7 +29,7 @@ type task struct {
 	Name        string    `json:"name"`
 }
 
-func Report(config *config.Config) {
+func Report(config *configuration.Configuration) {
 	workspaceGID := workspaceGID(config)
 	if workspaceGID == "" {
 		panic("No workspace gid")
@@ -42,7 +42,7 @@ func Report(config *config.Config) {
 	printCompletedTasks(tasks, config)
 }
 
-func workspaceGID(config *config.Config) string {
+func workspaceGID(config *configuration.Configuration) string {
 	url := "https://app.asana.com/api/1.0/workspaces"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -61,7 +61,7 @@ func workspaceGID(config *config.Config) string {
 	return resp.Data[0].Gid
 }
 
-func projectGIDs(workspaceGID string, config *config.Config) []string {
+func projectGIDs(workspaceGID string, config *configuration.Configuration) []string {
 	url := fmt.Sprintf("https://app.asana.com/api/1.0/workspaces/%s/projects", workspaceGID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -84,7 +84,7 @@ func projectGIDs(workspaceGID string, config *config.Config) []string {
 	return projectGIDs
 }
 
-func allTasks(projectGIDs []string, config *config.Config) []task {
+func allTasks(projectGIDs []string, config *configuration.Configuration) []task {
 	var tasks []task
 	for _, projectGID := range projectGIDs {
 		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate)
@@ -107,7 +107,7 @@ func allTasks(projectGIDs []string, config *config.Config) []task {
 	return tasks
 }
 
-func printCompletedTasks(tasks []task, config *config.Config) {
+func printCompletedTasks(tasks []task, config *configuration.Configuration) {
 	var completedTasks []task
 	for _, task := range tasks {
 		if task.Completed && task.CompletedAt.Before(config.TodayMidnight) {
