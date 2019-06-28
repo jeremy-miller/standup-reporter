@@ -31,6 +31,7 @@ type task struct {
 }
 
 func Report(config *configuration.Configuration) error {
+	fmt.Println("Gathering Asana task data")
 	workspaceGID, err := workspaceGID(config)
 	if err != nil {
 		return xerrors.Errorf("error retrieving workspace: %w", err)
@@ -54,6 +55,7 @@ func Report(config *configuration.Configuration) error {
 }
 
 func workspaceGID(config *configuration.Configuration) (string, error) {
+	fmt.Println("Getting Asana workspace")
 	url := "https://app.asana.com/api/1.0/workspaces"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -73,6 +75,7 @@ func workspaceGID(config *configuration.Configuration) (string, error) {
 }
 
 func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]string, error) {
+	fmt.Println("Getting Asana projects in workspace")
 	url := fmt.Sprintf("https://app.asana.com/api/1.0/workspaces/%s/projects", workspaceGID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -96,6 +99,7 @@ func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]st
 }
 
 func allTasks(projectGIDs []string, config *configuration.Configuration) ([]task, error) {
+	fmt.Println("Getting tasks for all Asana projects")
 	var tasks []task
 	for _, projectGID := range projectGIDs {
 		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate)
