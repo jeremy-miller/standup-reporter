@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -18,5 +19,7 @@ func main() {
 	app.HelpFlag.Short('h')
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 	config := configuration.Get(*days, *asanaToken)
-	asana.Report(config)
+	if err := asana.Report(config); err != nil {
+		fmt.Printf("%+v", err)
+	}
 }
