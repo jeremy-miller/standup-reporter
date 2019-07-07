@@ -1,5 +1,3 @@
-PKG_LIST := $(shell go list ./...)
-
 default: help
 
 .PHONY: help
@@ -10,8 +8,8 @@ help: ## Show this help
 	@awk -F ':|##' '/^[^\t].+?:.*?##/ {printf "\033[36m%-30s\033[0m %s\n", $$1, $$NF}' $(MAKEFILE_LIST)
 
 .PHONY: build
-build: ## Build the standup-reporter executable
-	@go install -i $(PKG_LIST)
+build: clean ## Build the standup-reporter executables and place them in local build/ directory
+	@scripts/build.sh
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
@@ -23,8 +21,8 @@ remove-deps: ## Remove unused dependencies
 
 .PHONY: clean
 clean: ## Remove generated/compiled files
-	@go clean $(PKG_LIST)
-	@rm -rf ${GOPATH}/bin/standup-reporter
+	@go clean
+	@rm -rf build
 
 .PHONY: update-hooks
 update-hooks: ## Update pre-commit hook versions
