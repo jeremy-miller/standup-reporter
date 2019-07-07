@@ -1,3 +1,5 @@
+PKG_LIST := $(shell go list ./...)
+
 default: help
 
 .PHONY: help
@@ -9,7 +11,11 @@ help: ## Show this help
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
-	@scripts/build.sh
+	@build/build.sh
+
+.PHONY: check
+check:
+	@go build $(PKG_LIST)
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
@@ -22,7 +28,7 @@ remove-deps: ## Remove unused dependencies
 .PHONY: clean
 clean: ## Remove generated/compiled files
 	@go clean
-	@rm -rf build
+	@rm -rf bin
 
 .PHONY: update-hooks
 update-hooks: ## Update pre-commit hook versions

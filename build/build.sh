@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 package_name=standup-reporter
-output_directory=build
+output_directory=bin
 
 platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
 
