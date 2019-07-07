@@ -14,8 +14,12 @@ build: clean ## Build the standup-reporter executables and place them in local b
 	@build/build.sh
 
 .PHONY: check
-check:
+check: ## Try building all packages without producing binaries (i.e. check for errors)
 	@go build $(PKG_LIST)
+
+.PHONY: modd
+modd: ## Run modd
+	@./modd --file=config/modd.conf
 
 .PHONY: update-deps
 update-deps: ## Update dependencies

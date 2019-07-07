@@ -5,6 +5,8 @@ Generate reports for standup meetings.
 - [Git Pre-Commit Hooks](#git-pre-commit-hooks)
     - [Install `pre-commit`](#install-pre-commit)
     - [Update Hooks](#update-hooks)
+- [`modd`](#modd)
+    - [Run `modd`](#run-modd)
 - [Run](#run)
     - [Create Asana Personal Access Token](#create-asana-personal-access-token)
 
@@ -18,6 +20,14 @@ After install, the pre-commit hooks configured in `.pre-commit-config.yaml` will
 
 ### Update Hooks
 To update `pre-commit` hooks: `make update-hooks`
+
+## `modd`
+Install [`modd`](https://github.com/cortesi/modd) by downloading a binary from [here](https://github.com/cortesi/modd/releases).
+
+### Run `modd`
+To run: `make modd`
+
+When running, it will re-run commands from the `config/modd.conf` file when any `*.go` files change.
 
 ## Run
 To run: `standup-reporter --asana=<token>`
