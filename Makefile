@@ -12,6 +12,9 @@ help: ## Show this help
 .PHONY: setup
 setup: ## Setup development environment
 	@go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@pip3 install pre-commit
+	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit
+	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory

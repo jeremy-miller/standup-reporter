@@ -14,7 +14,8 @@ Generate reports for standup meetings.
 ### Install `pre-commit`
 To install [pre-commit](https://pre-commit.com/):
 1. `pip3 install pre-commit`
-2. `pre-commit install -c githooks/.pre-commit-config.yaml`
+2. Pre-commit hooks: `pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit`
+3. Pre-push hooks: `pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push`
 
 After install, the pre-commit hooks configured in `.pre-commit-config.yaml` will be executed before every commit.
 
