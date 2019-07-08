@@ -14,7 +14,7 @@ func main() {
 	fmt.Println("Running standup reporter")
 	var (
 		app        = kingpin.New("standup-reporter", "Command-line application to gather daily standup reports.")
-		days       = app.Flag("days", "Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).").Short('d').PlaceHolder("N").Int()
+		days       = app.Flag("days", "Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).").Short('d').PlaceHolder("N").Int() //nolint:lll
 		asanaToken = app.Flag("asana", "Asana Personal Access Token").Short('a').Required().PlaceHolder("TOKEN").String()
 	)
 	app.HelpFlag.Short('h')
