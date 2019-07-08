@@ -2,6 +2,7 @@
 
 package_name=standup-reporter
 output_directory=bin
+app=github.com/jeremy-miller/standup-reporter/cmd/standup-reporter
 
 platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
 
@@ -17,7 +18,7 @@ for platform in "${platforms[@]}"; do
 
     echo "Building ${output_name}..."
 
-    env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${output_directory}/${output_name}
+    env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${output_directory}/${output_name} ${app}
 
     if [[ $? -ne 0 ]]; then
         echo -e "\nAn error has occurred! Aborting the script execution..."

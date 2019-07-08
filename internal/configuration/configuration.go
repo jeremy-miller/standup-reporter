@@ -3,6 +3,7 @@ package configuration
 import (
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -11,6 +12,7 @@ type Configuration struct {
 	Client        http.Client
 	TodayMidnight time.Time
 	EarliestDate  string
+	WG            *sync.WaitGroup
 }
 
 func Get(days int, asanaToken string) *Configuration {
@@ -19,11 +21,13 @@ func Get(days int, asanaToken string) *Configuration {
 	}
 	t := time.Now().Local()
 	todayMidnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
 	return &Configuration{
 		AuthHeader:    fmt.Sprintf("Bearer %s", asanaToken),
 		Client:        http.Client{},
 		TodayMidnight: todayMidnight,
 		EarliestDate:  todayMidnight.AddDate(0, 0, -days).Format(time.RFC3339),
+		WG:            &wg,
 	}
 }
 

@@ -30,8 +30,13 @@ type task struct {
 	Name        string    `json:"name"`
 }
 
+type taskResult struct {
+	Tasks []task
+	Err   error
+}
+
 func Report(config *configuration.Configuration) error {
-	fmt.Println("Gathering Asana data")
+	fmt.Println("\nGathering Asana data...")
 	workspaceGID, err := workspaceGID(config)
 	if err != nil {
 		return xerrors.Errorf("error retrieving workspace: %w", err)
@@ -46,9 +51,9 @@ func Report(config *configuration.Configuration) error {
 	if len(projectGIDs) == 0 {
 		return xerrors.New("no projects in workspace")
 	}
-	tasks, err := allTasks(projectGIDs, config)
-	if err != nil {
-		return xerrors.Errorf("error retrieving tasks: %w", err)
+	tasks := allTasks(projectGIDs, config)
+	if len(tasks) == 0 {
+		return xerrors.Errorf("no tasks: %w", err)
 	}
 	printCompletedTasks(tasks, config)
 	printIncompleteTasks(tasks)
@@ -56,7 +61,6 @@ func Report(config *configuration.Configuration) error {
 }
 
 func workspaceGID(config *configuration.Configuration) (string, error) {
-	fmt.Println("Getting workspace")
 	url := "https://app.asana.com/api/1.0/workspaces"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -76,7 +80,6 @@ func workspaceGID(config *configuration.Configuration) (string, error) {
 }
 
 func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]string, error) {
-	fmt.Println("Getting projects in workspace")
 	url := fmt.Sprintf("https://app.asana.com/api/1.0/workspaces/%s/projects", workspaceGID)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -99,31 +102,61 @@ func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]st
 	return projectGIDs, nil
 }
 
-func allTasks(projectGIDs []string, config *configuration.Configuration) ([]task, error) {
-	fmt.Println("Getting tasks for all projects")
+func allTasks(projectGIDs []string, config *configuration.Configuration) []task {
 	var tasks []task
+	results := make(chan taskResult)
 	for _, projectGID := range projectGIDs {
-		url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate)
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			fmt.Printf("error creating task request for project %s: %+v", projectGID, err)
-			continue
-		}
-		req.Header.Set("Authorization", config.AuthHeader)
-		res, err := config.Client.Do(req)
-		if err != nil {
-			fmt.Printf("error requesting tasks for project %s: %+v", projectGID, err)
-			continue
-		}
-		defer res.Body.Close()
-		var taskResponse taskResponse
-		if err = json.NewDecoder(res.Body).Decode(&taskResponse); err != nil {
-			fmt.Printf("error decoding tasks response for project %s: %+v", projectGID, err)
-			continue
-		}
-		tasks = append(tasks, taskResponse.Data...)
+		config.WG.Add(1)
+		go projectTasks(projectGID, config, results)
 	}
-	return tasks, nil
+	go func() {
+		config.WG.Wait()
+		close(results)
+	}()
+	for r := range results {
+		if r.Err != nil {
+			fmt.Printf("%+v", r.Err)
+			continue
+		}
+		tasks = append(tasks, r.Tasks...)
+	}
+	return tasks
+}
+
+func projectTasks(projectGID string, config *configuration.Configuration, results chan<- taskResult) {
+	defer config.WG.Done()
+	url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		results <- taskResult{
+			Tasks: nil,
+			Err:   xerrors.Errorf("error creating task request for project %s: %+v", projectGID, err),
+		}
+		return
+	}
+	req.Header.Set("Authorization", config.AuthHeader)
+	res, err := config.Client.Do(req)
+	if err != nil {
+		results <- taskResult{
+			Tasks: nil,
+			Err:   xerrors.Errorf("error requesting tasks for project %s: %+v", projectGID, err),
+		}
+		return
+	}
+	defer res.Body.Close()
+	var taskResponse taskResponse
+	if err = json.NewDecoder(res.Body).Decode(&taskResponse); err != nil {
+		results <- taskResult{
+			Tasks: nil,
+			Err:   xerrors.Errorf("error decoding tasks response for project %s: %+v", projectGID, err),
+		}
+		return
+	}
+	results <- taskResult{
+		Tasks: taskResponse.Data,
+		Err:   nil,
+	}
+	return
 }
 
 func printCompletedTasks(tasks []task, config *configuration.Configuration) {
@@ -151,4 +184,5 @@ func printIncompleteTasks(tasks []task) {
 	for _, task := range incompleteTasks {
 		fmt.Println("-", task.Name)
 	}
+	fmt.Println()
 }

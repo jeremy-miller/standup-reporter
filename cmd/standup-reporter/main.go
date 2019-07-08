@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting standup reporter")
+	fmt.Println("Running standup reporter")
 	var (
 		app        = kingpin.New("standup-reporter", "Command-line application to gather daily standup reports.")
 		days       = app.Flag("days", "Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).").Short('d').PlaceHolder("N").Int()

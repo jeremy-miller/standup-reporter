@@ -31,7 +31,7 @@ remove-deps: ## Remove unused dependencies
 
 .PHONY: clean
 clean: ## Remove generated/compiled files
-	@go clean
+	@go clean $(PKG_LIST)
 	@rm -rf bin
 
 .PHONY: update-hooks
