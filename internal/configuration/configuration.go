@@ -13,6 +13,7 @@ type Configuration struct {
 	TodayMidnight time.Time
 	EarliestDate  string
 	WG            *sync.WaitGroup
+	Quit          chan struct{}
 }
 
 func Get(days int, asanaToken string) *Configuration {
@@ -22,12 +23,14 @@ func Get(days int, asanaToken string) *Configuration {
 	t := time.Now().Local()
 	todayMidnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
+	quit := make(chan struct{})
 	return &Configuration{
 		AuthHeader:    fmt.Sprintf("Bearer %s", asanaToken),
 		Client:        http.Client{},
 		TodayMidnight: todayMidnight,
 		EarliestDate:  todayMidnight.AddDate(0, 0, -days).Format(time.RFC3339),
 		WG:            &wg,
+		Quit:          quit,
 	}
 }
 

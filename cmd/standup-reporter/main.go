@@ -7,6 +7,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/jeremy-miller/standup-reporter/internal/asana"
+	"github.com/jeremy-miller/standup-reporter/internal/cleanup"
 	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
@@ -20,6 +21,7 @@ func main() {
 	app.HelpFlag.Short('h')
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 	config := configuration.Get(*days, *asanaToken)
+	cleanup.Setup(config)
 	if err := asana.Report(config); err != nil {
 		fmt.Printf("%+v", err)
 	}
