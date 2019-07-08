@@ -19,6 +19,7 @@ repos:
         language: system
         types: [go]
         entry: make check
+        stages: [push]
       - id: lint
         name: make lint
         language: system
