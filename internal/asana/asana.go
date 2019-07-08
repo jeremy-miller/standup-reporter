@@ -165,7 +165,7 @@ func printCompletedTasks(tasks []task, config *configuration.Configuration) {
 			completedTasks = append(completedTasks, task)
 		}
 	}
-	sort.Slice(completedTasks, func(i, j int) bool { return completedTasks[i].CompletedAt.Before(completedTasks[j].CompletedAt) })
+	sort.Slice(completedTasks, func(i, j int) bool { return completedTasks[i].CompletedAt.Before(completedTasks[j].CompletedAt) }) //nolint:lll
 	fmt.Println("\nYesterday's Activity:")
 	for _, task := range completedTasks {
 		fmt.Println("-", task.Name)
