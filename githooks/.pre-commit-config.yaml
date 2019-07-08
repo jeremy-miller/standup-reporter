@@ -11,16 +11,10 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
       - id: trailing-whitespace
-  - repo: git://github.com/dnephin/pre-commit-golang
-    rev: master
+  - repo: local
     hooks:
-      - id: go-build
-      - id: golangci-lint
-        stages: [push]
-  - repo: https://github.com/syntaqx/git-hooks
-    rev: v0.0.16
-    hooks:
-      - id: forbid-binary
-      - id: go-mod-tidy
-      - id: go-test
-        stages: [push]
+      - id: check
+        name: make check
+        language: system
+        types: [go]
+        entry: make check
