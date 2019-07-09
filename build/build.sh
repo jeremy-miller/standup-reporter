@@ -16,7 +16,7 @@ for platform in "${platforms[@]}"; do
         output_name+=".exe"
     fi
 
-    echo "Building ${output_name}..."
+    echo "Building ${output_name}"
 
     env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${output_directory}/${output_name} ${app}
 
