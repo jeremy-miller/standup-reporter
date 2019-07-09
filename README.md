@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/jeremy-miller/standup-reporter.svg?branch=master)](https://travis-ci.org/jeremy-miller/standup-reporter)
+
 # Standup Reporter
 Generate reports for standup meetings.
 
