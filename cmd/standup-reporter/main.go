@@ -21,6 +21,6 @@ func main() {
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 	config := configuration.Get(*days, *asanaToken)
 	if err := asana.Report(config); err != nil {
-		fmt.Printf("%+v", err)
+		fmt.Printf("\n%v\n", err)
 	}
 }

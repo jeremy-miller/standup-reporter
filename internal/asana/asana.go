@@ -53,7 +53,7 @@ func Report(config *configuration.Configuration) error {
 	}
 	tasks := allTasks(projectGIDs, config)
 	if len(tasks) == 0 {
-		return xerrors.Errorf("no tasks: %w", err)
+		return xerrors.New("no tasks available")
 	}
 	printCompletedTasks(tasks, config)
 	printIncompleteTasks(tasks)
