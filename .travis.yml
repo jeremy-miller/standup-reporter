@@ -3,6 +3,8 @@ go:
   - 1.12.x
 install:
   - make setup-ci
+before_script:
+  - make update-deps
 script:
   - make lint-ci
   - make build
