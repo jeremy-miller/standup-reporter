@@ -115,7 +115,7 @@ func allTasks(projectGIDs []string, config *configuration.Configuration) []task 
 	}()
 	for r := range results {
 		if r.Err != nil {
-			fmt.Printf("%+v", r.Err)
+			fmt.Printf("%v", r.Err)
 			continue
 		}
 		tasks = append(tasks, r.Tasks...)
@@ -130,7 +130,7 @@ func projectTasks(projectGID string, config *configuration.Configuration, result
 	if err != nil {
 		results <- taskResult{
 			Tasks: nil,
-			Err:   xerrors.Errorf("error creating task request for project %s: %+v", projectGID, err),
+			Err:   xerrors.Errorf("error creating task request for project %s: %v", projectGID, err),
 		}
 		return
 	}
@@ -139,7 +139,7 @@ func projectTasks(projectGID string, config *configuration.Configuration, result
 	if err != nil {
 		results <- taskResult{
 			Tasks: nil,
-			Err:   xerrors.Errorf("error requesting tasks for project %s: %+v", projectGID, err),
+			Err:   xerrors.Errorf("error requesting tasks for project %s: %v", projectGID, err),
 		}
 		return
 	}
@@ -148,7 +148,7 @@ func projectTasks(projectGID string, config *configuration.Configuration, result
 	if err = json.NewDecoder(res.Body).Decode(&taskResponse); err != nil {
 		results <- taskResult{
 			Tasks: nil,
-			Err:   xerrors.Errorf("error decoding tasks response for project %s: %+v", projectGID, err),
+			Err:   xerrors.Errorf("error decoding tasks response for project %s: %v", projectGID, err),
 		}
 		return
 	}
