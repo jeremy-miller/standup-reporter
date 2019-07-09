@@ -21,7 +21,7 @@ for platform in "${platforms[@]}"; do
     env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${output_directory}/${output_name} ${app}
 
     if [[ $? -ne 0 ]]; then
-        echo -e "\nAn error has occurred! Aborting the script execution..."
+        echo -e "\nError building ${output_name}"
         exit 1
     fi
 done
