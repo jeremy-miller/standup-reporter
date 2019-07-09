@@ -16,6 +16,11 @@ setup: ## Setup development environment
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push
 
+.PHONY: setup-ci
+setup-ci: ## Setup CI/CD environment
+	@pip install pre-commit
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
+
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
 	@build/build.sh
@@ -31,6 +36,10 @@ modd: ## Run modd
 .PHONY: lint
 lint: ## Lint files
 	@golangci-lint run --config config/.golangci.yml ./...
+
+.PHONY: lint-ci
+lint-ci: ## Lint files during CI/CD
+	@git diff-tree --no-commit-id --name-only -r $TRAVIS_COMMIT | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
