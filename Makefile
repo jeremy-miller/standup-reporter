@@ -18,8 +18,8 @@ setup: ## Setup development environment
 
 .PHONY: setup-ci
 setup-ci: ## Setup CI/CD environment
-	@curl https://pre-commit.com/install-local.py | python -
-	@go get github.com/golangci/golangci-lint/cmd/golangci-lint
+	curl https://pre-commit.com/install-local.py | python -
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
@@ -39,7 +39,7 @@ lint: ## Lint files
 
 .PHONY: lint-ci
 lint-ci: ## Lint files during CI/CD
-	@git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
+	git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
