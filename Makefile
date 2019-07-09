@@ -39,7 +39,7 @@ lint: ## Lint files
 
 .PHONY: lint-ci
 lint-ci: ## Lint files during CI/CD
-	@git diff-tree --no-commit-id --name-only -r $TRAVIS_COMMIT | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
+	@git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
