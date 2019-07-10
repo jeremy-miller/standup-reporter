@@ -10,10 +10,11 @@ import (
 	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
+// set by release process
 var (
-	version string
-	commit  string
-	date    string
+	version string //nolint:gochecknoglobals
+	commit  string //nolint:gochecknoglobals
+	date    string //nolint:gochecknoglobals
 )
 
 func main() {
