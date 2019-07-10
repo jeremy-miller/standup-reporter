@@ -2,7 +2,7 @@
 
 package_name=standup-reporter
 output_directory=bin
-app=github.com/jeremy-miller/standup-reporter/cmd/standup-reporter
+app=github.com/jeremy-miller/standup-reporter/cmd
 
 platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
 
