@@ -19,6 +19,7 @@ setup: ## Setup development environment
 .PHONY: setup-ci
 setup-ci: ## Setup CI/CD environment
 	go mod download
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 	curl https://pre-commit.com/install-local.py | python -
 
 .PHONY: build
