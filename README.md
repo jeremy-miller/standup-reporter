@@ -25,7 +25,7 @@ After install, the pre-commit hooks configured in `.pre-commit-config.yaml` will
 To update `pre-commit` hooks: `make update-hooks`
 
 ## `modd`
-Install [`modd`](https://github.com/cortesi/modd) by downloading a binary from [here](https://github.com/cortesi/modd/releases).
+Install [`modd`](https://github.com/cortesi/modd) by downloading a binary from [here](https://github.com/cortesi/modd/releases/latest).
 
 ### Run `modd`
 To run: `make modd`
