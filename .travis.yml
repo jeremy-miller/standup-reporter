@@ -5,8 +5,6 @@ env:
   - GO111MODULE=on
 install:
   - make setup-ci
-before_script:
-  - make update-deps
 script:
   - make lint-ci
   - make build

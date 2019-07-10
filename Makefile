@@ -19,7 +19,7 @@ setup: ## Setup development environment
 .PHONY: setup-ci
 setup-ci: ## Setup CI/CD environment
 	curl https://pre-commit.com/install-local.py | python -
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint
+	go mod download
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
