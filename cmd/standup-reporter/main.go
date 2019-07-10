@@ -10,15 +10,22 @@ import (
 	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
+var (
+	version string
+	commit  string
+	date    string
+)
+
 func main() {
-	fmt.Println("Running standup reporter")
 	var (
 		app        = kingpin.New("standup-reporter", "Command-line application to gather daily standup reports.")
 		days       = app.Flag("days", "Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).").Short('d').PlaceHolder("N").Int() //nolint:lll
 		asanaToken = app.Flag("asana", "Asana Personal Access Token").Short('a').Required().PlaceHolder("TOKEN").String()
 	)
 	app.HelpFlag.Short('h')
+	app.Version(fmt.Sprintf("Version: %s\nCommit: %s\nBuild Date: %s", version, commit, date))
 	kingpin.MustParse(app.Parse(os.Args[1:]))
+	fmt.Println("Running standup reporter")
 	config := configuration.Get(*days, *asanaToken)
 	if err := asana.Report(config); err != nil {
 		fmt.Printf("\n%v\n", err)
