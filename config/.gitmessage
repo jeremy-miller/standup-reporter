@@ -1,0 +1,49 @@
+
+# <tag>: <subject>       Using up to 50 chars --->|<--- Max 72 chars -->|
+#
+# The HEADER is a single line of 50 characters which contains a succint
+# description of the change.  It contains a <type>, followed by a
+# colon (:), followed by a space, followed by the <subject>.
+#   + <type> describes the kind of change this commit provides.
+#     Allowed types:
+#       * feat:     A new feature
+#       * fix:      A bug fix
+#       * docs:     Documentation changes only
+#       * style:    Formatting, missing parentheses, etc
+#       * refactor: Change which doesn't add a feature or fix a bug
+#       * perf:     Change which improves performance
+#       * test:     Add missing tests or correct existing tests
+#       * chore:    Update CI/CD, etc
+#   + <subject> is a short description of the change.
+#     Format:
+#       * Answers the question "If applied, this commit will <subject>"
+#       * Capitalize the first word of the subject line
+#       * Do not end the subject line with a period
+#       * Separate subject line from body with a blank line
+#
+# Example:
+# feat: Implement import REST API endpoint
+
+
+# <body?>                 Limit each line to a maximum of 72 chars ---->|
+#
+# (Optional) The body explains the motivation for the change and contrasts
+# this with previous behavior.  It should be phrased in the imperative
+# present tense (e.g. "change" not "changed"/"changes").
+
+
+# <footer?>               Limit each line to a maximum of 72 chars ---->|
+#
+# (Optional) The footer should contain any information about Breaking
+# Changes and is also the place to reference GitHub issues that this commit
+# closes.
+#
+# Breaking Changes should start with the words BREAKING CHANGE: with a
+# space or two newlines. The rest of the commit message is then the
+# description of the change, justification, and migration notes.
+#
+# Closed issues should be referenced on a separate line and prefixed with
+# the "Closes" keyword, and can reference multiple issues if necessary.
+#
+# Example:
+# Closes #123, #234
