@@ -152,9 +152,18 @@ func projectTasks(projectGID string, config *configuration.Configuration, result
 		}
 		return
 	}
+	filterEmptyTasks(taskResponse.Data)
 	results <- taskResult{
 		Tasks: taskResponse.Data,
 		Err:   nil,
+	}
+}
+
+func filterEmptyTasks(tasks []task) {
+	for i, task := range tasks {
+		if task.Name == "" {
+			tasks = append(tasks[:i], tasks[i+1:]...)
+		}
 	}
 }
 
