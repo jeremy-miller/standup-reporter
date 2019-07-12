@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/jeremy-miller/standup-reporter.svg?branch=master)](https://travis-ci.org/jeremy-miller/standup-reporter)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 # Standup Reporter
 Generate reports for standup meetings.
