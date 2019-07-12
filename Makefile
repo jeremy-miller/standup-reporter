@@ -23,6 +23,7 @@ setup-ci: ## Setup CI/CD environment
 	go mod download
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 	curl https://pre-commit.com/install-local.py | python -
+	npm install @commitlint/travis-cli
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
@@ -42,6 +43,7 @@ lint: ## Lint files
 
 .PHONY: lint-ci
 lint-ci: ## Lint files during CI/CD
+	commitlint-travis --config=config/commitlint.config.js
 	git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 	golangci-lint run --config config/.golangci.yml ./...
 
