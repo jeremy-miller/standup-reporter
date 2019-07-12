@@ -1,6 +1,7 @@
 [![Build Status](https://travis-ci.org/jeremy-miller/standup-reporter.svg?branch=master)](https://travis-ci.org/jeremy-miller/standup-reporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jeremy-miller/standup-reporter)](https://goreportcard.com/report/github.com/jeremy-miller/standup-reporter)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![MIT Licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jeremy-miller/standup-reporter/blob/master/LICENSE)
 
 # Standup Reporter
 Generate reports for standup meetings.
