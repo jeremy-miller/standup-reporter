@@ -43,7 +43,7 @@ lint: ## Lint files
 
 .PHONY: lint-ci
 lint-ci: ## Lint files during CI/CD
-	commitlint-travis --config=config/commitlint.config.js
+	commitlint-travis
 	git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 	golangci-lint run --config config/.golangci.yml ./...
 

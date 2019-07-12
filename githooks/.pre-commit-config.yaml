@@ -16,7 +16,6 @@ repos:
     rev: v1.0.0
     hooks:
       - id: commitlint
-        args: ['--config=config/commitlint.config.js']
         additional_dependencies: ['@commitlint/config-conventional']
         stages: [commit-msg]
   - repo: local
