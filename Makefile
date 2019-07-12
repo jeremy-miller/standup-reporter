@@ -23,7 +23,7 @@ setup-ci: ## Setup CI/CD environment
 	go mod download
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 	curl https://pre-commit.com/install-local.py | python -
-	npm install -g @commitlint/travis-cli
+	npm install -g @commitlint/travis-cli @commitlint/config-conventional
 
 .PHONY: build
 build: clean ## Build the standup-reporter executables and place them in local build/ directory
