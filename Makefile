@@ -15,6 +15,7 @@ setup: ## Setup development environment
 	@pip3 install pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push
+	@pre-commit install -c githooks/.pre-commit-config.yaml -t commit-msg
 	@git config --local commit.template config/.gitmessage
 
 .PHONY: setup-ci
