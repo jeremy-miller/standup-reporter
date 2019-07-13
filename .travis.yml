@@ -8,3 +8,12 @@ install:
 script:
   - make lint-ci
   - make build
+before_deploy:
+  - npx semantic-release
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: curl -sL https://git.io/goreleaser | bash -s -- --config=config/.goreleaser.yml
+    on:
+      branch: master
+      condition: $TRAVIS_OS_NAME = linux
