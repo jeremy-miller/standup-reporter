@@ -61,7 +61,7 @@ func Report(config *configuration.Configuration) error {
 }
 
 func workspaceGID(config *configuration.Configuration) (string, error) {
-	url := "https://app.asana.com/api/1.0/workspaces"
+	const url = "https://app.asana.com/api/1.0/workspaces"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", xerrors.Errorf("error creating workspace request: %w", err)
