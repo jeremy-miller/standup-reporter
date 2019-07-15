@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/jeremy-miller/standup-reporter.svg?branch=master)](https://travis-ci.org/jeremy-miller/standup-reporter)
+[![GoDoc](https://godoc.org/github.com/jeremy-miller/standup-reporter?status.svg)](https://godoc.org/github.com/jeremy-miller/standup-reporter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jeremy-miller/standup-reporter)](https://goreportcard.com/report/github.com/jeremy-miller/standup-reporter)
 [![GitHub release](https://img.shields.io/github/release/jeremy-miller/standup-reporter.svg)](https://github.com/jeremy-miller/standup-reporter/releases)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
