@@ -26,7 +26,7 @@ setup-ci: ## Setup CI/CD environment
 	npm install -g @commitlint/travis-cli @commitlint/config-conventional semantic-release
 
 .PHONY: build
-build: clean ## Build the standup-reporter executables and place them in local build/ directory
+build: clean ## Build the standup-reporter executables and place them in local bin/ directory
 	@build/build.sh
 
 .PHONY: check
