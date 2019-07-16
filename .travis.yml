@@ -7,7 +7,7 @@ install:
   - make setup-ci
 script:
   - make lint-ci
-  - make build
+  - make check
 before_deploy:
   - npx semantic-release
 deploy:
