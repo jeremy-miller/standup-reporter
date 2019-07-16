@@ -8,6 +8,7 @@
 [![Powered By: GoReleaser](https://img.shields.io/badge/Powered%20By-Goreleaser-brightgreen.svg)](https://github.com/goreleaser)
 [![MIT Licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jeremy-miller/standup-reporter/blob/master/LICENSE)
 
+
 # Standup Reporter
 Generate reports for standup meetings.
 
