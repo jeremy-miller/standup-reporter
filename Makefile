@@ -59,7 +59,7 @@ coverage: ## Run all tests with data race detection and generate code coverage
 
 .PHONY: coverage-ci
 coverage-ci: ## Run all tests and generate code coverage during CI/CD
-	$GOPATH/bin/goveralls -service=travis-ci
+	$(GOPATH)/bin/goveralls -service=travis-ci
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
