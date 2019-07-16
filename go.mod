@@ -23,6 +23,7 @@ require (
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/logrusorgru/aurora v0.0.0-20190428105938-cea283e61946 // indirect
+	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
 	github.com/prometheus/common v0.6.0 // indirect
 	github.com/prometheus/procfs v0.0.3 // indirect
 	github.com/prometheus/tsdb v0.9.1 // indirect
@@ -41,7 +42,7 @@ require (
 	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
 	golang.org/x/mobile v0.0.0-20190711165009-e47acb2ca7f9 // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
-	golang.org/x/tools v0.0.0-20190716021316-fefcef05abb1 // indirect
+	golang.org/x/tools v0.0.0-20190716150014-919acb9f1ffd // indirect
 	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
 	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
 	google.golang.org/grpc v1.22.0 // indirect
