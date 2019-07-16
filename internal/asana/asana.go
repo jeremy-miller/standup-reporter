@@ -1,3 +1,15 @@
+/*
+Package asana contains all functionality for retrieving tasks from Asana and printing them to the screen.
+
+Tasks from all Asana projects are used in the standup-reporter.  Unless specified, the default number of days to go back
+and get tasks for is 1, except if the script is run on a Monday, in which case it will go back 3 days (to account for
+the weekend).
+
+Completed tasks are sorted oldest to most recently completed.  Only tasks which were completed between midnight of the
+requested day and midnight of the current day (both in local time) are shown.
+
+Regarding incomplete tasks, all non-complete tasks are shown and are not sorted.
+*/
 package asana
 
 import (
@@ -35,6 +47,9 @@ type taskResult struct {
 	Err   error
 }
 
+/*
+Report coordinates gathering of Asana task data and prints completed and incomplete tasks to the screen.
+*/
 func Report(config *configuration.Configuration) error {
 	fmt.Println("\nGathering Asana data...")
 	workspaceGID, err := workspaceGID(config)

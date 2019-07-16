@@ -1,3 +1,6 @@
+/*
+Standup-Reporter gathers data for daily standup reports and prints it to the screen.
+*/
 package main
 
 import (
