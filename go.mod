@@ -19,7 +19,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.9.4 // indirect
 	github.com/jeremy-miller/standup-reporter v1.0.0
 	github.com/kisielk/errcheck v1.2.0 // indirect
-	github.com/klauspost/compress v1.7.2 // indirect
+	github.com/klauspost/compress v1.7.4 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/kr/pty v1.1.8 // indirect
 	github.com/logrusorgru/aurora v0.0.0-20190428105938-cea283e61946 // indirect
@@ -41,7 +41,7 @@ require (
 	golang.org/x/image v0.0.0-20190703141733-d6a02ce849c9 // indirect
 	golang.org/x/mobile v0.0.0-20190711165009-e47acb2ca7f9 // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
-	golang.org/x/tools v0.0.0-20190715044752-607ca053a137 // indirect
+	golang.org/x/tools v0.0.0-20190716021316-fefcef05abb1 // indirect
 	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
 	google.golang.org/genproto v0.0.0-20190708153700-3bdd9d9f5532 // indirect
 	google.golang.org/grpc v1.22.0 // indirect

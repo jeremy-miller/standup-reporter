@@ -1,3 +1,6 @@
+/*
+Package configuration handles standup-reporter configuration.
+*/
 package configuration
 
 import (
@@ -7,14 +10,20 @@ import (
 	"time"
 )
 
+/*
+Configuration defines the configuration parameters of the standup-reporter.
+*/
 type Configuration struct {
-	AuthHeader    string
-	Client        http.Client
-	TodayMidnight time.Time
-	EarliestDate  string
-	WG            *sync.WaitGroup
+	AuthHeader    string          // Authentication token used to authenticate to Asana.
+	Client        http.Client     // HTTP client which will be reused for all requests.
+	TodayMidnight time.Time       // Today's date at midnight in the local timezone.
+	EarliestDate  string          // Midnight of the day for which Asana tasks will be retrieved.
+	WG            *sync.WaitGroup // WaitGroup used to coordinate goroutines.
 }
 
+/*
+Get returns the current configuration of the standup-reporter.
+*/
 func Get(days int, asanaToken string) *Configuration {
 	if days == 0 {
 		days = calculateDays()
