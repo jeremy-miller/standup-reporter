@@ -1,27 +1,29 @@
 #!/usr/bin/env bash
 
-package_name=standup-reporter
-output_directory=bin
-app=github.com/jeremy-miller/standup-reporter/cmd
+PACKAGE_NAME=standup-reporter
+OUTPUT_DIR=bin
+APP=github.com/jeremy-miller/standup-reporter/cmd
 
-platforms=("linux/amd64" "darwin/amd64" "windows/amd64")
+PLATFORMS=("linux/amd64/linux/x86_64" "darwin/amd64/macOS/x86_64" "windows/amd64/windows/x86_64")
 
-for platform in "${platforms[@]}"; do
-    platform_split=(${platform//\// })
-    GOOS=${platform_split[0]}
-    GOARCH=${platform_split[1]}
-    output_name=${package_name}"-"${GOOS}"-"${GOARCH}
+for PLATFORM in "${PLATFORMS[@]}"; do
+    PLATFORM_SPLIT=(${PLATFORM//\// })
+    GOOS=${PLATFORM_SPLIT[0]}
+    GOARCH=${PLATFORM_SPLIT[1]}
+    OUTPUT_OS=${PLATFORM_SPLIT[2]}
+    OUTPUT_ARCH=${PLATFORM_SPLIT[3]}
+    OUTPUT_NAME=${PACKAGE_NAME}"-"${OUTPUT_OS}"-"${OUTPUT_ARCH}
 
     if [[ ${GOOS} = "windows" ]]; then
-        output_name+=".exe"
+        OUTPUT_NAME+=".exe"
     fi
 
-    echo "Building ${output_name}"
+    echo "Building ${OUTPUT_NAME}"
 
-    env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${output_directory}/${output_name} ${app}
+    env GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${OUTPUT_DIR}/${OUTPUT_NAME} ${APP}
 
     if [[ $? -ne 0 ]]; then
-        echo -e "\nError building ${output_name}"
+        echo -e "\nError building ${OUTPUT_NAME}"
         exit 1
     fi
 done
