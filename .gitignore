@@ -1,4 +1,5 @@
 .idea/
 bin/
+.testCoverage.txt
 goreleaser
 modd

@@ -67,6 +67,12 @@ When running, it will re-run commands from the `config/modd.conf` file when any 
 ### Lint
 To lint all files: `make lint`
 
+### Test
+To run all tests (including data race checking): `make test`
+
+### Test Coverage
+To run all tests (including data race checking) and generate code coverage: `make coverage`
+
 ### Update Dependencies
 To update all dependency versions: `make update-deps`
 

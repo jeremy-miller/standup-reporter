@@ -22,6 +22,7 @@ setup: ## Setup development environment
 setup-ci: ## Setup CI/CD environment
 	go mod download
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
+	go get github.com/mattn/goveralls
 	curl https://pre-commit.com/install-local.py | python -
 	npm install -g @commitlint/travis-cli @commitlint/config-conventional semantic-release
 
@@ -46,6 +47,19 @@ lint-ci: ## Lint files during CI/CD
 	commitlint-travis
 	git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
 	golangci-lint run --config config/.golangci.yml ./...
+
+.PHONY: test
+test: ## Run all tests with data race detection
+	@go test -v -race $(PKG_LIST)
+
+.PHONY: coverage
+coverage: ## Run all tests with data race detection and generate code coverage
+	@go test -v -race $(PKG_LIST) -coverprofile .testCoverage.txt
+	@go tool cover -func=.testCoverage.txt
+
+.PHONY: coverage-ci
+coverage-ci: ## Run all tests and generate code coverage during CI/CD
+	$GOPATH/bin/goveralls -service=travis-ci
 
 .PHONY: update-deps
 update-deps: ## Update dependencies
