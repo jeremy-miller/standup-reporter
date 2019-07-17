@@ -8,6 +8,7 @@ builds:
     - windows
   goarch:
     - amd64
+  main: ./cmd/standup-reporter/main.go
 archives:
 - format: tar.gz
   format_overrides:
