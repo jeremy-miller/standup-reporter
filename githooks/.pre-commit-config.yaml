@@ -32,3 +32,9 @@ repos:
         types: [go]
         entry: make lint
         stages: [push]
+      - id: test
+        name: make test
+        language: system
+        types: [go]
+        entry: make test
+        stages: [push]
