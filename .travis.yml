@@ -11,7 +11,7 @@ install:
 script:
   - make lint-ci
   - make check
-  #- make coverage-ci
+  - make coverage-ci
 before_deploy:
   - npx semantic-release
 deploy:

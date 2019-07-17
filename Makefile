@@ -22,7 +22,7 @@ setup: ## Setup development environment
 setup-ci: ## Setup CI/CD environment
 	go mod download
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
-	go get github.com/mattn/goveralls
+	go get github.com/mattn/goveralls@4d9899298d217719a8aea971675da567f0e3f96d
 	curl https://pre-commit.com/install-local.py | python -
 	npm install -g @commitlint/travis-cli @commitlint/config-conventional semantic-release
 
