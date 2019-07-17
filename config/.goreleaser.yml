@@ -1,15 +1,19 @@
 builds:
-- env:
-    - CGO_ENABLED=0
-    - GO111MODULE=on
-- goos:
-    - darwin
-    - linux
-    - windows
-- goarch:
-    - amd64
+  - id: binary
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+
 archives:
-- format: binary
-- replacements:
-    darwin: macOS
-    amd64: x86_64
+  - builds:
+      - binary
+  - format: binary
+  - replacements:
+      darwin: macOS
+      amd64: x86_64
