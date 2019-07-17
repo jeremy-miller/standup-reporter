@@ -13,7 +13,6 @@ before_deploy:
   - npx semantic-release
 deploy:
   - provider: script
-    skip_cleanup: true
     script: curl -sL https://git.io/goreleaser | bash -s -- --config=config/.goreleaser.yml
     on:
       branch: master
