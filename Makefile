@@ -61,6 +61,10 @@ coverage: ## Run all tests with data race detection and generate code coverage
 coverage-ci: ## Run all tests and generate code coverage during CI/CD
 	goveralls -service=travis-ci
 
+.PHONY: run
+run: build ## Build and run the standup-reporter; assumes ASANA_TOKEN env var exists
+	@bin/standup-reporter --asana=$(ASANA_TOKEN)
+
 .PHONY: update-deps
 update-deps: ## Update dependencies
 	@go get -u ./...
