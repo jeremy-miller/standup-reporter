@@ -2,12 +2,13 @@ package configuration_test
 
 import (
 	"fmt"
-	"github.com/jeremy-miller/standup-reporter/internal/configuration"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/jeremy-miller/standup-reporter/internal/configuration"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGet1Day(t *testing.T) {
@@ -17,7 +18,7 @@ func TestGet1Day(t *testing.T) {
 	config := configuration.Get(days, asanaToken)
 	assert.Equal(fmt.Sprintf("Bearer %s", asanaToken), config.AuthHeader)
 	assert.IsType(http.Client{}, config.Client)
-	assert.Equal(time.Second * 10, config.Client.Timeout)
+	assert.Equal(time.Second*10, config.Client.Timeout)
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	assert.Equal(midnight, config.TodayMidnight)
@@ -32,7 +33,7 @@ func TestGet0Day(t *testing.T) {
 	config := configuration.Get(days, asanaToken)
 	assert.Equal(fmt.Sprintf("Bearer %s", asanaToken), config.AuthHeader)
 	assert.IsType(http.Client{}, config.Client)
-	assert.Equal(time.Second * 10, config.Client.Timeout)
+	assert.Equal(time.Second*10, config.Client.Timeout)
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	assert.Equal(midnight, config.TodayMidnight)

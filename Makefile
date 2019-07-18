@@ -12,6 +12,7 @@ help: ## Show this help
 .PHONY: setup
 setup: ## Setup development environment
 	@go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@go get golang.org/x/tools/cmd/goimports
 	@pip3 install pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push
