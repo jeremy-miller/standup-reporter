@@ -51,7 +51,7 @@ One tool which is installed during `make setup` is [pre-commit](https://pre-comm
 hooks: `make update-hooks`
 
 ### Build
-To build `standup-reporter` for the supported operating systems and architectures: `make build`
+To build `standup-reporter` for the current operating system and architecture: `make build`
 
 ### Compile Without Outputting Binaries
 To build all packages without producing binaries (i.e. check for errors): `make check`
@@ -73,6 +73,9 @@ To run all tests (including data race checking): `make test`
 
 ### Test Coverage
 To run all tests (including data race checking) and generate code coverage: `make coverage`
+
+### Run
+To build and run the `standup-reporter` locally (substituting your Asana personal access token): `ASANA_TOKEN=<your_asana_personal_access_token> make run`
 
 ### Update Dependencies
 To update all dependency versions: `make update-deps`
