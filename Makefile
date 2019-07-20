@@ -12,6 +12,7 @@ help: ## Show this help
 .PHONY: setup
 setup: ## Setup development environment
 	@go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+	@go get golang.org/x/tools/cmd/goimports
 	@pip3 install pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-commit
 	@pre-commit install -c githooks/.pre-commit-config.yaml -t pre-push
@@ -27,8 +28,8 @@ setup-ci: ## Setup CI/CD environment
 	npm install -g @commitlint/travis-cli @commitlint/config-conventional semantic-release
 
 .PHONY: build
-build: clean ## Build the standup-reporter executables and place them in local bin/ directory
-	@build/build.sh
+build: clean ## Build the standup-reporter executable for the current OS and place it in local bin/ directory
+	@go build -o bin/standup-reporter github.com/jeremy-miller/standup-reporter/cmd/standup-reporter
 
 .PHONY: check
 check: ## Try building all packages without producing binaries (i.e. check for errors)
@@ -60,6 +61,10 @@ coverage: ## Run all tests with data race detection and generate code coverage
 .PHONY: coverage-ci
 coverage-ci: ## Run all tests and generate code coverage during CI/CD
 	goveralls -service=travis-ci
+
+.PHONY: run
+run: build ## Build and run the standup-reporter; assumes ASANA_TOKEN env var exists
+	@bin/standup-reporter --asana=$(ASANA_TOKEN)
 
 .PHONY: update-deps
 update-deps: ## Update dependencies

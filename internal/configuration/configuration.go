@@ -25,10 +25,10 @@ type Configuration struct {
 Get returns the current configuration of the standup-reporter.
 */
 func Get(days int, asanaToken string) *Configuration {
-	if days == 0 {
-		days = calculateDays()
-	}
 	t := time.Now().Local()
+	if days == 0 {
+		days = calculateDays(t)
+	}
 	todayMidnight := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
 	return &Configuration{
@@ -42,8 +42,8 @@ func Get(days int, asanaToken string) *Configuration {
 	}
 }
 
-func calculateDays() int {
-	if time.Now().Weekday() == time.Monday { // account for weekend
+func calculateDays(t time.Time) int {
+	if t.Weekday() == time.Monday { // account for weekend
 		return 3
 	}
 	return 1
