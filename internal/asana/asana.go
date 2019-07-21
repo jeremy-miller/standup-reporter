@@ -13,9 +13,11 @@ Regarding incomplete tasks, all non-complete tasks are shown and are not sorted.
 package asana
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"sort"
 	"time"
 
@@ -24,16 +26,18 @@ import (
 	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
+type client struct {
+	authToken string
+	baseURL   *url.URL
+	client    http.Client
+}
+
 type response struct {
-	Data []entry `json:"data"`
+	Data interface{} `json:"data"`
 }
 
 type entry struct {
 	Gid string `json:"gid"`
-}
-
-type taskResponse struct {
-	Data []task `json:"data"`
 }
 
 type task struct {
@@ -50,23 +54,21 @@ type taskResult struct {
 /*
 Report coordinates gathering of Asana task data and prints completed and incomplete tasks to the screen.
 */
-func Report(config *configuration.Configuration) error {
+func Report(authToken string, config *configuration.Configuration) error {
 	fmt.Println("\nGathering Asana data...")
-	workspaceGID, err := workspaceGID(config)
+	client := getClient(authToken)
+	workspaceGID, err := client.workspaceGID()
 	if err != nil {
 		return xerrors.Errorf("error retrieving workspace: %w", err)
 	}
-	if workspaceGID == "" {
-		return xerrors.New("no workspace")
-	}
-	projectGIDs, err := projectGIDs(workspaceGID, config)
+	projectGIDs, err := client.projectGIDs(workspaceGID)
 	if err != nil {
 		return xerrors.Errorf("error retrieving projects: %w", err)
 	}
 	if len(projectGIDs) == 0 {
 		return xerrors.New("no projects in workspace")
 	}
-	tasks := allTasks(projectGIDs, config)
+	tasks := client.allTasks(projectGIDs, config)
 	if len(tasks) == 0 {
 		return xerrors.New("no tasks available")
 	}
@@ -75,59 +77,77 @@ func Report(config *configuration.Configuration) error {
 	return nil
 }
 
-func workspaceGID(config *configuration.Configuration) (string, error) {
-	const url = "https://app.asana.com/api/1.0/workspaces"
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", xerrors.Errorf("error creating workspace request: %w", err)
+func getClient(authToken string) *client {
+	const defaultBaseURL = "https://app.asana.com/api/1.0/"
+	baseURL, _ := url.Parse(defaultBaseURL)
+	return &client{
+		authToken: authToken,
+		baseURL:   baseURL,
+		client: http.Client{
+			Timeout: time.Second * 10,
+		},
 	}
-	req.Header.Set("Authorization", config.AuthHeader)
-	res, err := config.Client.Do(req)
-	if err != nil {
-		return "", xerrors.Errorf("error requesting workspace: %w", err)
-	}
-	defer res.Body.Close()
-	var resp response
-	if err = json.NewDecoder(res.Body).Decode(&resp); err != nil {
-		return "", xerrors.Errorf("error decoding workspace response: %w", err)
-	}
-	return resp.Data[0].Gid, nil
 }
 
-func projectGIDs(workspaceGID string, config *configuration.Configuration) ([]string, error) {
-	url := fmt.Sprintf("https://app.asana.com/api/1.0/workspaces/%s/projects", workspaceGID)
-	req, err := http.NewRequest("GET", url, nil)
+func (c *client) request(ctx context.Context, path string, responseObj interface{}) error {
+	relPath, err := url.Parse(path)
 	if err != nil {
-		return nil, xerrors.Errorf("error creating projects request: %w", err)
+		return xerrors.Errorf("error parsing relative path \"%s\": %w", path, err)
 	}
-	req.Header.Set("Authorization", config.AuthHeader)
-	res, err := config.Client.Do(req)
+	fullURL := c.baseURL.ResolveReference(relPath).String()
+	req, err := http.NewRequest("GET", fullURL, nil)
 	if err != nil {
-		return nil, xerrors.Errorf("error requesting projects: %w", err)
+		return xerrors.Errorf("error creating request to \"%s\": %w", fullURL, err)
+	}
+	authHeader := fmt.Sprintf("Bearer %s", c.authToken)
+	req.Header.Set("Authorization", authHeader)
+	res, err := c.client.Do(req.WithContext(ctx))
+	if err != nil {
+		return xerrors.Errorf("error requesting \"%s\": %w", fullURL, err)
 	}
 	defer res.Body.Close()
-	var response response
-	if err = json.NewDecoder(res.Body).Decode(&response); err != nil {
-		return nil, xerrors.Errorf("error decoding projects response: %w", err)
+	parsedResponse := &response{Data: responseObj}
+	if err = json.NewDecoder(res.Body).Decode(parsedResponse); err != nil {
+		return xerrors.Errorf("error decoding response from \"%s\": %w", fullURL, err)
 	}
-	var projectGIDs []string
-	for _, project := range response.Data {
-		projectGIDs = append(projectGIDs, project.Gid)
-	}
-	return projectGIDs, nil
+	return nil
 }
 
-func allTasks(projectGIDs []string, config *configuration.Configuration) []task {
-	var tasks []task
+func (c *client) workspaceGID() (string, error) {
+	ctx := context.Background()
+	const path = "workspaces"
+	workspaces := new([]entry)
+	if err := c.request(ctx, path, workspaces); err != nil {
+		return "", err
+	}
+	return (*workspaces)[0].Gid, nil
+}
+
+func (c *client) projectGIDs(workspaceGID string) ([]string, error) {
+	ctx := context.Background()
+	path := fmt.Sprintf("workspaces/%s/projects", workspaceGID)
+	allProjects := new([]entry)
+	if err := c.request(ctx, path, allProjects); err != nil {
+		return nil, err
+	}
+	var projects []string
+	for _, project := range *allProjects {
+		projects = append(projects, project.Gid)
+	}
+	return projects, nil
+}
+
+func (c *client) allTasks(projectGIDs []string, config *configuration.Configuration) []task {
 	results := make(chan taskResult)
 	for _, projectGID := range projectGIDs {
 		config.WG.Add(1)
-		go projectTasks(projectGID, config, results)
+		go projectTasks(c, projectGID, config, results)
 	}
 	go func() {
 		config.WG.Wait()
 		close(results)
 	}()
+	var tasks []task
 	for r := range results {
 		if r.Err != nil {
 			fmt.Printf("%v", r.Err)
@@ -138,38 +158,21 @@ func allTasks(projectGIDs []string, config *configuration.Configuration) []task 
 	return tasks
 }
 
-func projectTasks(projectGID string, config *configuration.Configuration, results chan<- taskResult) {
+func projectTasks(c *client, projectGID string, config *configuration.Configuration, results chan<- taskResult) {
 	defer config.WG.Done()
-	url := fmt.Sprintf("https://app.asana.com/api/1.0/projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate) //nolint:lll
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		results <- taskResult{
-			Tasks: nil,
-			Err:   xerrors.Errorf("error creating task request for project %s: %v", projectGID, err),
-		}
-		return
-	}
-	req.Header.Set("Authorization", config.AuthHeader)
-	res, err := config.Client.Do(req)
-	if err != nil {
+	ctx := context.Background()
+	path := fmt.Sprintf("projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate) //nolint:lll
+	tasks := new([]task)
+	if err := c.request(ctx, path, tasks); err != nil {
 		results <- taskResult{
 			Tasks: nil,
 			Err:   xerrors.Errorf("error requesting tasks for project %s: %v", projectGID, err),
 		}
 		return
 	}
-	defer res.Body.Close()
-	var taskResponse taskResponse
-	if err = json.NewDecoder(res.Body).Decode(&taskResponse); err != nil {
-		results <- taskResult{
-			Tasks: nil,
-			Err:   xerrors.Errorf("error decoding tasks response for project %s: %v", projectGID, err),
-		}
-		return
-	}
-	filterEmptyTasks(taskResponse.Data)
+	filterEmptyTasks(*tasks)
 	results <- taskResult{
-		Tasks: taskResponse.Data,
+		Tasks: *tasks,
 		Err:   nil,
 	}
 }

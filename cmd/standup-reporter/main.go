@@ -30,8 +30,8 @@ func main() {
 	app.Version(fmt.Sprintf("Version: %s\nCommit: %s\nBuild Date: %s", version, commit, date))
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 	fmt.Println("Running standup reporter")
-	config := configuration.Get(*days, *asanaToken)
-	if err := asana.Report(config); err != nil {
+	config := configuration.Get(*days)
+	if err := asana.Report(*asanaToken, config); err != nil {
 		fmt.Printf("\n%v\n", err)
 	}
 }
