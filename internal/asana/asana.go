@@ -79,7 +79,7 @@ func Report(authToken string, config *configuration.Configuration) error {
 
 func getClient(authToken string) *client {
 	const defaultBaseURL = "https://app.asana.com/api/1.0/"
-	baseURL, _ := url.Parse(defaultBaseURL)
+	baseURL, _ := url.Parse(defaultBaseURL) //nolint:errcheck
 	return &client{
 		authToken: authToken,
 		baseURL:   baseURL,
