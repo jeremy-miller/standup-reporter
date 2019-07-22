@@ -115,3 +115,44 @@ func TestWorkspaceGIDFailure(t *testing.T) {
 	_, err := cl.workspaceGID()
 	assert.NotNil(t, err)
 }
+
+func TestProjectGIDsSuccessSomeProjects(t *testing.T) {
+	setup()
+	defer teardown()
+	assert := assert.New(t)
+	workspaceGID := "12345"
+	pattern := fmt.Sprintf("/workspaces/%s/projects", workspaceGID)
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"data":[
+			{"gid":"1","name":"Project 1"},
+			{"gid":"2","name":"Project 2"}
+		]}`)
+	})
+	actualProjectsGIDs, err := cl.projectGIDs(workspaceGID)
+	assert.Nil(err)
+	expectedProjectGIDs := []string{"1", "2"}
+	assert.Equal(expectedProjectGIDs, actualProjectsGIDs)
+}
+
+func TestProjectGIDsSuccessNoProjects(t *testing.T) {
+	setup()
+	defer teardown()
+	assert := assert.New(t)
+	workspaceGID := "12345"
+	pattern := fmt.Sprintf("/workspaces/%s/projects", workspaceGID)
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"data":[]}`)
+	})
+	actualProjectsGIDs, err := cl.projectGIDs(workspaceGID)
+	assert.Nil(err)
+	expectedProjectGIDs := new([]string)
+	assert.Equal(*expectedProjectGIDs, actualProjectsGIDs)
+}
+
+func TestProjectGIDsFailure(t *testing.T) {
+	setup()
+	defer teardown()
+	workspaceGID := "12345"
+	_, err := cl.projectGIDs(workspaceGID)
+	assert.NotNil(t, err)
+}
