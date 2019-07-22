@@ -26,8 +26,12 @@ func TestGet0Day(t *testing.T) {
 	const days = 0
 	config := configuration.Get(days)
 	now := time.Now().Local()
+	expectedDays := 1
+	if now.Weekday() == time.Monday {
+		expectedDays = 3
+	}
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	assert.Equal(midnight, config.TodayMidnight)
-	assert.Equal(midnight.AddDate(0, 0, -1).Format(time.RFC3339), config.EarliestDate)
+	assert.Equal(midnight.AddDate(0, 0, -expectedDays).Format(time.RFC3339), config.EarliestDate)
 	assert.IsType(&sync.WaitGroup{}, config.WG)
 }
