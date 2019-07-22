@@ -120,7 +120,7 @@ func TestProjectGIDsSuccessSomeProjects(t *testing.T) {
 	setup()
 	defer teardown()
 	assert := assert.New(t)
-	workspaceGID := "12345"
+	const workspaceGID = "12345"
 	pattern := fmt.Sprintf("/workspaces/%s/projects", workspaceGID)
 	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"data":[
@@ -138,7 +138,7 @@ func TestProjectGIDsSuccessNoProjects(t *testing.T) {
 	setup()
 	defer teardown()
 	assert := assert.New(t)
-	workspaceGID := "12345"
+	const workspaceGID = "12345"
 	pattern := fmt.Sprintf("/workspaces/%s/projects", workspaceGID)
 	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"data":[]}`)
@@ -152,7 +152,7 @@ func TestProjectGIDsSuccessNoProjects(t *testing.T) {
 func TestProjectGIDsFailure(t *testing.T) {
 	setup()
 	defer teardown()
-	workspaceGID := "12345"
+	const workspaceGID = "12345"
 	_, err := cl.projectGIDs(workspaceGID)
 	assert.NotNil(t, err)
 }
