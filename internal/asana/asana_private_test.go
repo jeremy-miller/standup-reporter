@@ -19,7 +19,7 @@ var (
 )
 
 type testObj struct {
-	Gid  int    `json:"gid"`
+	Gid  string `json:"gid"`
 	Name string `json:"name"`
 }
 
@@ -53,14 +53,14 @@ func TestRequestSuccess(t *testing.T) {
 	assert := assert.New(t)
 	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"data":[
-			{"gid":1,"name":"test"}
+			{"gid":"1","name":"test"}
 		]}`)
 	})
 	responseObj := new([]testObj)
 	err := cl.request(context.Background(), "test", responseObj)
 	assert.Nil(err)
 	expected := []testObj{
-		{Gid: 1, Name: "test"},
+		{Gid: "1", Name: "test"},
 	}
 	assert.Equal(&expected, responseObj)
 }
@@ -86,10 +86,32 @@ func TestRequestInvalidJSON(t *testing.T) {
 	assert := assert.New(t)
 	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, `{"data":[
-			{"gid":"1","name":"test"}
+			{"gid":1,"name":"test"}
 		]}`)
 	})
 	responseObj := new([]testObj)
 	err := cl.request(context.Background(), "test", responseObj)
 	assert.Error(err)
+}
+
+func TestWorkspaceGIDSuccess(t *testing.T) {
+	setup()
+	defer teardown()
+	assert := assert.New(t)
+	mux.HandleFunc("/workspaces", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"data":[
+			{"gid":"1","name":"Workspace 1"}
+		]}`)
+	})
+	actualGID, err := cl.workspaceGID()
+	assert.Nil(err)
+	expectedGID := "1"
+	assert.Equal(expectedGID, actualGID)
+}
+
+func TestWorkspaceGIDFailure(t *testing.T) {
+	setup()
+	defer teardown()
+	_, err := cl.workspaceGID()
+	assert.NotNil(t, err)
 }
