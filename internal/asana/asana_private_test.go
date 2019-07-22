@@ -13,9 +13,9 @@ import (
 )
 
 var (
-	cl     *client
-	mux    *http.ServeMux
-	server *httptest.Server
+	cl     *client          //nolint:gochecknoglobals
+	mux    *http.ServeMux   //nolint:gochecknoglobals
+	server *httptest.Server //nolint:gochecknoglobals
 )
 
 type testObj struct {
@@ -28,7 +28,7 @@ func setup() {
 	cl = getClient(authToken)
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
-	u, _ := url.Parse(server.URL)
+	u, _ := url.Parse(server.URL) //nolint:errcheck
 	cl.baseURL = u
 }
 
