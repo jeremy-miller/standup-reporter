@@ -95,10 +95,7 @@ func (c *client) request(ctx context.Context, path string, responseObj interface
 		return xerrors.Errorf("error parsing relative path \"%s\": %w", path, err)
 	}
 	fullURL := c.baseURL.ResolveReference(relPath).String()
-	req, err := http.NewRequest("GET", fullURL, nil)
-	if err != nil {
-		return xerrors.Errorf("error creating request to \"%s\": %w", fullURL, err)
-	}
+	req, _ := http.NewRequest("GET", fullURL, nil) //nolint:errcheck
 	authHeader := fmt.Sprintf("Bearer %s", c.authToken)
 	req.Header.Set("Authorization", authHeader)
 	res, err := c.client.Do(req.WithContext(ctx))
