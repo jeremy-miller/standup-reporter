@@ -6,10 +6,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/jeremy-miller/standup-reporter/internal/configuration"
 )
 
 var (
@@ -145,8 +148,8 @@ func TestProjectGIDsSuccessNoProjects(t *testing.T) {
 	})
 	actualProjectsGIDs, err := cl.projectGIDs(workspaceGID)
 	assert.Nil(err)
-	expectedProjectGIDs := new([]string)
-	assert.Equal(*expectedProjectGIDs, actualProjectsGIDs)
+	var expectedProjectGIDs []string
+	assert.Equal(expectedProjectGIDs, actualProjectsGIDs)
 }
 
 func TestProjectGIDsFailure(t *testing.T) {
@@ -156,3 +159,264 @@ func TestProjectGIDsFailure(t *testing.T) {
 	_, err := cl.projectGIDs(workspaceGID)
 	assert.NotNil(t, err)
 }
+
+func TestAllTasksOneProjectNoTasks(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1"}
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"data":[]}`)
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	var expectedTasks []task
+	assert.Equal(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksOneProjectSomeTasks(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1"}
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":"Task 1"}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	expectedTasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	assert.Equal(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksOneProjectEmptyTask(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1"}
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":""}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	var expectedTasks []task
+	assert.Equal(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksOneProjectEmptyTaskNonEmptyTask(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1"}
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":""},
+			{"completed":true,"completed_at":"%s","name":"Task 1"}
+		]}`, completedAt.Format(time.RFC3339), completedAt.Format(time.RFC3339))
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	expectedTasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	assert.Equal(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksOneProjectFailure(t *testing.T) {
+	setup()
+	defer teardown()
+	assert := assert.New(t)
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1"}
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	var expectedTasks []task
+	assert.Equal(expectedTasks, actualTasks)
+}
+
+func TestAllTasksMultipleProjectsAllTasks(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1", "2"}
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	pattern1 := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	mux.HandleFunc(pattern1, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":"Task 1"}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	pattern2 := fmt.Sprintf("/projects/%s/tasks", projectGIDs[1])
+	mux.HandleFunc(pattern2, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":"Task 2"}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	expectedTasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt, Name: "Task 2"},
+	}
+	assert.ElementsMatch(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksMultipleProjectsSomeTasksSomeNone(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1", "2"}
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	pattern1 := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	mux.HandleFunc(pattern1, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":"Task 1"}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	pattern2 := fmt.Sprintf("/projects/%s/tasks", projectGIDs[1])
+	mux.HandleFunc(pattern2, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{"data":[]}`)
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	expectedTasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	assert.ElementsMatch(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1", "2"}
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[
+			{"completed":true,"completed_at":"%s","name":"Task 1"}
+		]}`, completedAt.Format(time.RFC3339))
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	expectedTasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	assert.ElementsMatch(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1", "2"}
+	pattern := fmt.Sprintf("/projects/%s/tasks", projectGIDs[0])
+	mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, `{"data":[]}`)
+	})
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	var expectedTasks []task
+	assert.ElementsMatch(t, expectedTasks, actualTasks)
+}
+
+func TestAllTasksMultipleProjectsAllError(t *testing.T) {
+	setup()
+	defer teardown()
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	projectGIDs := []string{"1", "2"}
+	actualTasks := cl.allTasks(projectGIDs, conf)
+	var expectedTasks []task
+	assert.ElementsMatch(t, expectedTasks, actualTasks)
+}
+
+func TestPrintCompletedTasksNoTasks(t *testing.T) {}
+
+func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {}
+
+func TestPrintCompletedTasksSomeAfterTodayMidnightSomeBeforeTodayMidnight(t *testing.T) {}
+
+func TestPrintCompletedTasksAllBeforeTodayMidnight(t *testing.T) {}
+
+func TestPrintCompletedTasksNotSortedDateOrder(t *testing.T) {}
+
+func TestPrintCompletedTasksAlreadySortedDateOrder(t *testing.T) {}
+
+func TestPrintIncompleteTasksNoIncomplete(t *testing.T) {}
+
+func TestPrintIncompleteTasksSomeIncompleteSomeComplete(t *testing.T) {}
+
+func TestPrintIncompleteTasksAllIncomplete(t *testing.T) {}
