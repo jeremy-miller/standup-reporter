@@ -159,27 +159,29 @@ func projectTasks(c *client, projectGID string, config *configuration.Configurat
 	defer config.WG.Done()
 	ctx := context.Background()
 	path := fmt.Sprintf("projects/%s/tasks?opt_fields=name,completed,completed_at&completed_since=%s", projectGID, config.EarliestDate) //nolint:lll
-	tasks := new([]task)
-	if err := c.request(ctx, path, tasks); err != nil {
+	var tasks []task
+	if err := c.request(ctx, path, &tasks); err != nil {
 		results <- taskResult{
 			Tasks: nil,
 			Err:   xerrors.Errorf("error requesting tasks for project %s: %v", projectGID, err),
 		}
 		return
 	}
-	filterEmptyTasks(*tasks)
+	filteredTasks := filterEmptyTasks(tasks)
 	results <- taskResult{
-		Tasks: *tasks,
+		Tasks: filteredTasks,
 		Err:   nil,
 	}
 }
 
-func filterEmptyTasks(tasks []task) {
+func filterEmptyTasks(tasks []task) []task {
+	var filteredTasks []task
 	for i, task := range tasks {
-		if task.Name == "" {
-			tasks = append(tasks[:i], tasks[i+1:]...)
+		if task.Name != "" {
+			filteredTasks = append(filteredTasks, tasks[i])
 		}
 	}
+	return filteredTasks
 }
 
 func printCompletedTasks(tasks []task, config *configuration.Configuration) {
