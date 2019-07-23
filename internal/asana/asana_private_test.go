@@ -266,7 +266,7 @@ func TestAllTasksOneProjectFailure(t *testing.T) {
 	defer teardown()
 	assert := assert.New(t)
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
@@ -282,7 +282,7 @@ func TestAllTasksOneProjectFailure(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
@@ -290,7 +290,7 @@ func TestAllTasksOneProjectFailure(t *testing.T) {
 	actualOutput := <-outputChan
 	var expectedTasks []task
 	assert.Equal(expectedTasks, actualTasks)
-	expectedOutput := "error requesting tasks for project 1"
+	const expectedOutput = "error requesting tasks for project 1"
 	assert.Contains(actualOutput, expectedOutput)
 }
 
@@ -362,7 +362,7 @@ func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
 	defer teardown()
 	assert := assert.New(t)
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
@@ -385,7 +385,7 @@ func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
@@ -395,7 +395,7 @@ func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
 		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
 	}
 	assert.ElementsMatch(expectedTasks, actualTasks)
-	expectedOutput := "error requesting tasks for project 2"
+	const expectedOutput = "error requesting tasks for project 2"
 	assert.Contains(actualOutput, expectedOutput)
 }
 
@@ -404,7 +404,7 @@ func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
 	defer teardown()
 	assert := assert.New(t)
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
@@ -424,7 +424,7 @@ func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
@@ -432,7 +432,7 @@ func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
 	actualOutput := <-outputChan
 	var expectedTasks []task
 	assert.ElementsMatch(expectedTasks, actualTasks)
-	expectedOutput := "error requesting tasks for project 2"
+	const expectedOutput = "error requesting tasks for project 2"
 	assert.Contains(actualOutput, expectedOutput)
 }
 
@@ -441,7 +441,7 @@ func TestAllTasksMultipleProjectsAllError(t *testing.T) {
 	defer teardown()
 	assert := assert.New(t)
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
@@ -457,7 +457,7 @@ func TestAllTasksMultipleProjectsAllError(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
@@ -465,13 +465,13 @@ func TestAllTasksMultipleProjectsAllError(t *testing.T) {
 	actualOutput := <-outputChan
 	var expectedTasks []task
 	assert.ElementsMatch(expectedTasks, actualTasks)
-	expectedOutput2 := "error requesting tasks for project 2"
+	const expectedOutput2 = "error requesting tasks for project 2"
 	assert.Contains(actualOutput, expectedOutput2)
 }
 
 func TestPrintCompletedTasksNoTasks(t *testing.T) {
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	var tasks []task
 	now := time.Now().Local()
@@ -487,19 +487,19 @@ func TestPrintCompletedTasksNoTasks(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
 	os.Stdout = oldStdout
 	actualOutput := <-outputChan
-	expectedOutput := "\nYesterday's Activity:\n"
+	const expectedOutput = "\nYesterday's Activity:\n"
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
 func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {
 	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
+	r, w, _ := os.Pipe() //nolint:errcheck
 	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
@@ -519,7 +519,7 @@ func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {
 	// copy the output in a separate goroutine so printing can't block indefinitely
 	go func() {
 		var buf bytes.Buffer
-		io.Copy(&buf, r)
+		io.Copy(&buf, r) //nolint:errcheck
 		outputChan <- buf.String()
 	}()
 	w.Close()
