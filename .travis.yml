@@ -7,11 +7,17 @@ branches:
   only:
     - master
 install:
-  - make setup-ci
+  - go mod download
+  - go get github.com/golangci/golangci-lint/cmd/golangci-lint
+  - go get github.com/mattn/goveralls@4d9899298d217719a8aea971675da567f0e3f96d  # get latest version with fix for go modules
+  - curl https://pre-commit.com/install-local.py | python -
+  - npm install -g @commitlint/travis-cli @commitlint/config-conventional semantic-release
 script:
-  - make lint-ci
+  - git diff-tree --no-commit-id --name-only -r $(TRAVIS_COMMIT) | xargs pre-commit run -c githooks/.pre-commit-config.yaml --files
+  - commitlint-travis
+  - golangci-lint run --config config/.golangci.yml ./...
   - make check
-  - make coverage-ci
+  - goveralls -service=travis-ci
 before_deploy:
   - npx semantic-release
 deploy:
