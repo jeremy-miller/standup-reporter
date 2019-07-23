@@ -1,11 +1,14 @@
 package asana
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -262,6 +265,9 @@ func TestAllTasksOneProjectFailure(t *testing.T) {
 	setup()
 	defer teardown()
 	assert := assert.New(t)
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
@@ -272,8 +278,20 @@ func TestAllTasksOneProjectFailure(t *testing.T) {
 	}
 	projectGIDs := []string{"1"}
 	actualTasks := cl.allTasks(projectGIDs, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
 	var expectedTasks []task
 	assert.Equal(expectedTasks, actualTasks)
+	expectedOutput := "error requesting tasks for project 1"
+	assert.Contains(actualOutput, expectedOutput)
 }
 
 func TestAllTasksMultipleProjectsAllTasks(t *testing.T) {
@@ -342,6 +360,10 @@ func TestAllTasksMultipleProjectsSomeTasksSomeNone(t *testing.T) {
 func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
 	setup()
 	defer teardown()
+	assert := assert.New(t)
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
@@ -359,15 +381,31 @@ func TestAllTasksMultipleProjectsSomeTasksSomeError(t *testing.T) {
 		]}`, completedAt.Format(time.RFC3339))
 	})
 	actualTasks := cl.allTasks(projectGIDs, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
 	expectedTasks := []task{
 		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
 	}
-	assert.ElementsMatch(t, expectedTasks, actualTasks)
+	assert.ElementsMatch(expectedTasks, actualTasks)
+	expectedOutput := "error requesting tasks for project 2"
+	assert.Contains(actualOutput, expectedOutput)
 }
 
 func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
 	setup()
 	defer teardown()
+	assert := assert.New(t)
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
@@ -382,13 +420,29 @@ func TestAllTasksMultipleProjectsSomeNoneSomeError(t *testing.T) {
 		fmt.Fprintf(w, `{"data":[]}`)
 	})
 	actualTasks := cl.allTasks(projectGIDs, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
 	var expectedTasks []task
-	assert.ElementsMatch(t, expectedTasks, actualTasks)
+	assert.ElementsMatch(expectedTasks, actualTasks)
+	expectedOutput := "error requesting tasks for project 2"
+	assert.Contains(actualOutput, expectedOutput)
 }
 
 func TestAllTasksMultipleProjectsAllError(t *testing.T) {
 	setup()
 	defer teardown()
+	assert := assert.New(t)
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	now := time.Now().Local()
 	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 	var wg sync.WaitGroup
@@ -399,13 +453,81 @@ func TestAllTasksMultipleProjectsAllError(t *testing.T) {
 	}
 	projectGIDs := []string{"1", "2"}
 	actualTasks := cl.allTasks(projectGIDs, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
 	var expectedTasks []task
-	assert.ElementsMatch(t, expectedTasks, actualTasks)
+	assert.ElementsMatch(expectedTasks, actualTasks)
+	expectedOutput2 := "error requesting tasks for project 2"
+	assert.Contains(actualOutput, expectedOutput2)
 }
 
-func TestPrintCompletedTasksNoTasks(t *testing.T) {}
+func TestPrintCompletedTasksNoTasks(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	var tasks []task
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	printCompletedTasks(tasks, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	expectedOutput := "\nYesterday's Activity:\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {}
+func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	completedAt := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt, Name: "Task 2"},
+	}
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	printCompletedTasks(tasks, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	expectedOutput := "\nYesterday's Activity:\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
 func TestPrintCompletedTasksSomeAfterTodayMidnightSomeBeforeTodayMidnight(t *testing.T) {}
 
