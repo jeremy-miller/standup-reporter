@@ -525,20 +525,178 @@ func TestPrintCompletedTasksAllAfterTodayMidnight(t *testing.T) {
 	w.Close()
 	os.Stdout = oldStdout
 	actualOutput := <-outputChan
-	expectedOutput := "\nYesterday's Activity:\n"
+	const expectedOutput = "\nYesterday's Activity:\n"
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
-func TestPrintCompletedTasksSomeAfterTodayMidnightSomeBeforeTodayMidnight(t *testing.T) {}
+func TestPrintCompletedTasksSomeAfterTodayMidnightSomeBeforeTodayMidnight(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	completedAt1 := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	completedAt2 := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: true, CompletedAt: completedAt1, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt2, Name: "Task 2"},
+	}
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	printCompletedTasks(tasks, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nYesterday's Activity:\n- Task 1\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintCompletedTasksAllBeforeTodayMidnight(t *testing.T) {}
+func TestPrintCompletedTasksAllBeforeTodayMidnight(t *testing.T) { //nolint:dupl
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	completedAt1 := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	completedAt2 := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: true, CompletedAt: completedAt1, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt2, Name: "Task 2"},
+	}
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	printCompletedTasks(tasks, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nYesterday's Activity:\n- Task 1\n- Task 2\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintCompletedTasksNotSortedDateOrder(t *testing.T) {}
+func TestPrintCompletedTasksNotSortedDateOrder(t *testing.T) { //nolint:dupl
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
+	completedAt1 := time.Date(now.Year(), now.Month(), now.Day()-1, 13, 0, 0, 0, time.Local)
+	completedAt2 := time.Date(now.Year(), now.Month(), now.Day()-1, 12, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: true, CompletedAt: completedAt1, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt2, Name: "Task 2"},
+	}
+	var wg sync.WaitGroup
+	conf := &configuration.Configuration{
+		TodayMidnight: midnight,
+		EarliestDate:  midnight.AddDate(0, 0, -1).Format(time.RFC3339),
+		WG:            &wg,
+	}
+	printCompletedTasks(tasks, conf)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nYesterday's Activity:\n- Task 2\n- Task 1\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintCompletedTasksAlreadySortedDateOrder(t *testing.T) {}
+func TestPrintIncompleteTasksNoIncomplete(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 13, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: true, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	printIncompleteTasks(tasks)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nToday's Planned Activity:\n\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintIncompleteTasksNoIncomplete(t *testing.T) {}
+func TestPrintIncompleteTasksSomeIncompleteSomeComplete(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 13, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: false, CompletedAt: completedAt, Name: "Task 1"},
+		{Completed: true, CompletedAt: completedAt, Name: "Task 2"},
+	}
+	printIncompleteTasks(tasks)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nToday's Planned Activity:\n- Task 1\n\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
 
-func TestPrintIncompleteTasksSomeIncompleteSomeComplete(t *testing.T) {}
-
-func TestPrintIncompleteTasksAllIncomplete(t *testing.T) {}
+func TestPrintIncompleteTasksAllIncomplete(t *testing.T) {
+	oldStdout := os.Stdout
+	r, w, _ := os.Pipe() //nolint:errcheck
+	os.Stdout = w
+	now := time.Now().Local()
+	completedAt := time.Date(now.Year(), now.Month(), now.Day()-1, 13, 0, 0, 0, time.Local)
+	tasks := []task{
+		{Completed: false, CompletedAt: completedAt, Name: "Task 1"},
+	}
+	printIncompleteTasks(tasks)
+	outputChan := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r) //nolint:errcheck
+		outputChan <- buf.String()
+	}()
+	w.Close()
+	os.Stdout = oldStdout
+	actualOutput := <-outputChan
+	const expectedOutput = "\nToday's Planned Activity:\n- Task 1\n\n"
+	assert.Equal(t, expectedOutput, actualOutput)
+}
