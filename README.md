@@ -21,7 +21,18 @@ To install `standup-reporter`, download the
 [latest release](https://github.com/jeremy-miller/standup-reporter/releases/latest).
 
 ## Usage
-The usage for `standup-reporter` is also available by using the `--help` or `-h` switch.
+The usage for `standup-reporter` is available by using the `--help` or `-h` switch.
+```bash
+usage: standup-reporter --asana=TOKEN [<flags>]
+
+Command-line application to gather daily standup reports.
+
+Flags:
+  -h, --help         Show context-sensitive help (also try --help-long and --help-man).
+  -d, --days=N       Number of days to go back to collect completed tasks. Default 1 day (or 3 days on Monday).
+  -a, --asana=TOKEN  Asana Personal Access Token
+      --version      Show application version.
+```
 
 ### Create Asana Personal Access Token
 An Asana personal access token is required to use `standup-reporter`.  To create an Asana personal access token:
